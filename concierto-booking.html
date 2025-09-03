@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservar Boletos - BoletoNetwork</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="phsoenix.svg">
+    <link rel="shortcut icon" type="image/svg+xml" href="phsoenix.svg">
+    
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Additional CSS Files -->
+    <link rel="stylesheet" href="assets/css/fontawesome.css">
+    <link rel="stylesheet" href="assets/css/templatemo-woox-travel.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #fff;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Remove white gap between header and banner */
+        .header-area {
+            margin-bottom: 0 !important;
+            z-index: 1000;
+        }
+
+        #booking-banner {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+
+        .header {
+            background: #2a2a2a;
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #22b3c1;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .main-container {
+            margin: 60px 0;
+        }
+
+        .stadium-section {
+            background: #fff;
+            border-radius: 23px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .stadium-section h2 {
+            color: #22b3c1;
+            font-size: 30px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .booking-panel {
+            background: #fff;
+            border-radius: 23px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        #estadio-svg {
+            width: 100%;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background: white;
+        }
+
+        .seccion-clickeable {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.1));
+        }
+
+        .seccion-clickeable:hover {
+            filter: brightness(1.1) drop-shadow(0 2px 8px rgba(255, 107, 53, 0.4));
+            stroke: #ff6b35;
+            stroke-width: 1.5;
+        }
+
+        .seccion-clickeable.selected {
+            filter: brightness(1.3) drop-shadow(0 4px 12px rgba(255, 107, 53, 0.6));
+            stroke: #ff6b35;
+            stroke-width: 3;
+            animation: selectedPulse 2s infinite;
+        }
+
+        @keyframes selectedPulse {
+            0%, 100% { filter: brightness(1.3) drop-shadow(0 4px 12px rgba(255, 107, 53, 0.6)); }
+            50% { filter: brightness(1.5) drop-shadow(0 6px 16px rgba(255, 107, 53, 0.8)); }
+        }
+
+        .seats-container {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 23px;
+            border: 2px solid #22b3c1;
+            color: #333;
+        }
+
+        .seats-container.active {
+            display: block;
+        }
+
+        .seats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .seat {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            background: #28a745;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .seat:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .seat.occupied {
+            background: #dc3545;
+            cursor: not-allowed;
+        }
+
+        .seat.selected {
+            background: #22b3c1;
+            transform: scale(1.2);
+            box-shadow: 0 4px 12px rgba(34, 179, 193, 0.5);
+        }
+
+        .seat.occupied:hover {
+            transform: none;
+        }
+
+        .panel-section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .panel-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .panel-section h3 {
+            color: #22b3c1;
+            margin-bottom: 15px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .zone-info {
+            background: #22b3c1;
+            color: white;
+            padding: 20px;
+            border-radius: 23px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: none;
+            box-shadow: 0 10px 20px rgba(34, 179, 193, 0.2);
+        }
+
+        .price {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .timer {
+            background: #dc3545;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            display: none;
+            margin-bottom: 15px;
+        }
+
+        .timer.active {
+            display: block;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: #22b3c1;
+            color: white;
+            border: 2px solid #22b3c1;
+            border-radius: 23px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: transparent;
+            color: #22b3c1;
+            border-color: #22b3c1;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(34, 179, 193, 0.3);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+            border: 2px solid #28a745;
+            border-radius: 23px;
+            transition: all 0.3s;
+        }
+
+        .btn-success:hover {
+            background: transparent;
+            color: #28a745;
+            border-color: #28a745;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .summary {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 23px;
+            display: none;
+            color: #333;
+        }
+
+        .summary.active {
+            display: block;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #22b3c1;
+        }
+
+        .seats-legend {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-seat {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+        }
+
+        /* ***** Payment Modal Styles ***** */
+        .payment-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .payment-modal.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideUp 0.3s ease;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            padding: 30px 30px 0 30px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            color: #22b3c1;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .close-modal {
+            font-size: 28px;
+            font-weight: bold;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: #22b3c1;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            padding: 30px;
+            gap: 40px;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .step::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 50px;
+            width: 40px;
+            height: 2px;
+            background: #ddd;
+            z-index: 1;
+        }
+
+        .step:last-child::after {
+            display: none;
+        }
+
+        .step.active::after,
+        .step.completed::after {
+            background: #22b3c1;
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #ddd;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s;
+        }
+
+        .step.active .step-number {
+            background: #22b3c1;
+            transform: scale(1.1);
+        }
+
+        .step.completed .step-number {
+            background: #28a745;
+        }
+
+        .step-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .step.active .step-label {
+            color: #22b3c1;
+            font-weight: 700;
+        }
+
+        .modal-body {
+            padding: 0 30px 30px 30px;
+        }
+
+        .step-content {
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        .step-content h3 {
+            color: #333;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #22b3c1;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .payment-method {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .payment-method:hover {
+            border-color: #22b3c1;
+            background: #f8f9fa;
+        }
+
+        .payment-method.active {
+            border-color: #22b3c1;
+            background: rgba(34, 179, 193, 0.1);
+        }
+
+        .payment-method i {
+            font-size: 24px;
+            color: #22b3c1;
+        }
+
+        .payment-form {
+            display: none;
+        }
+
+        .payment-form.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .paypal-info,
+        .oxxo-info {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .success-animation {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #28a745;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+            animation: bounceIn 0.8s ease;
+        }
+
+        .digital-ticket {
+            background: linear-gradient(135deg, #22b3c1, #1a9aa8);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .digital-ticket::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -50px;
+            width: 100px;
+            height: 100%;
+            background: rgba(255,255,255,0.1);
+            transform: rotate(45deg);
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px dashed rgba(255,255,255,0.3);
+            padding-bottom: 15px;
+        }
+
+        .ticket-header h4 {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .ticket-number {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .ticket-body {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .ticket-qr {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qr-placeholder {
+            background: rgba(255,255,255,0.9);
+            border-radius: 10px;
+            padding: 15px;
+            display: inline-block;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .qr-placeholder i {
+            font-size: 40px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        #qr-canvas {
+            background: white;
+            border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.3);
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .success-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: 2px solid #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: transparent;
+            color: #6c757d;
+        }
+
+        .modal-footer {
+            padding: 20px 30px 30px 30px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .booking-panel {
+                position: relative;
+                top: auto;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 10px;
+            }
+
+            .step-indicator {
+                gap: 20px;
+            }
+
+            .step::after {
+                width: 20px;
+                left: 30px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+
+            .ticket-body {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .success-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ***** Header Area Start ***** -->
+    <header class="header-area header-sticky">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <nav class="main-nav">
+                        <!-- ***** Logo Start ***** -->
+                        <a href="index.html" class="logo" style="display: flex; align-items: center; text-decoration: none;">
+                            <img src="phsoenix.svg" alt="BoletoNetwork" style="height: 40px; width: auto; margin-right: 10px;">
+                            <span style="color: #ffffff; font-weight: 700; font-size: 24px; font-family: 'Poppins', sans-serif; display: inline-block;">BoletoNetwork</span>
+                        </a>
+                        <!-- ***** Logo End ***** -->
+                        <!-- ***** Menu Start ***** -->
+                        <ul class="nav">
+                            <li><a href="index.html">Inicio</a></li>
+                            <li><a href="concierto-booking.html" class="active">Comprar</a></li>
+                        </ul>   
+                        <a class='menu-trigger'>
+                            <span>Menu</span>
+                        </a>
+                        <!-- ***** Menu End ***** -->
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- ***** Header Area End ***** -->
+    
+    <!-- ***** Banner de Booking Start ***** -->
+    <section id="booking-banner" style="background: url('assets/images/stadium-banner.jpg') no-repeat center center; background-size: cover; position: relative;">
+        <div style="background: rgba(0,0,0,0.6); position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
+        <div class="container" style="position: relative; z-index: 2;">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="header-text" style="text-align: center; padding: 170px 0 100px 0;">
+                        <h2 style="color: white; font-size: 48px; font-weight: 700; margin-bottom: 15px;">RESERVAR BOLETOS</h2>
+                        <p style="color: #22b3c1; font-size: 18px; font-weight: 400;">Selecciona tu zona y asientos para el concierto</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- ***** Banner de Booking End ***** -->
+
+    <div class="main-container">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="stadium-section">
+                        <h2>Selecciona tu Zona</h2>
+            
+            <svg id="estadio-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="677" height="449" viewBox="0 0 677 449">
+                <image href="assets/images/stadium.png" x="0" y="0" width="677" height="449" opacity="0.3" />
+                
+                <!-- Secciones con precios -->
+                <path class="seccion-clickeable" style="fill:#e9afaf" d="m 252.06467,167.35758 61.95573,-0.12854 v 132.00939 l -62.59842,-1.15685 z" id="center" data-nombre="Centro Izquierdo" data-precio="150" data-color="Rosa" />
+                <path class="seccion-clickeable" style="fill:#e9afaf" d="m 316.84494,167.606 81.80162,-0.36713 0.72712,132.34976 -83.25587,-0.5507 z" id="path7" data-nombre="Centro Derecho" data-precio="150" data-color="Rosa" />
+                
+                <path class="seccion-clickeable" style="fill:#0000ff" d="m 227.77083,302.70898 -8.35502,18.44532 45.37421,0.0643 -0.19281,-18.38105 z" id="azul1" data-nombre="Tribuna Sur-Oeste" data-precio="80" data-color="Azul" />
+                <path class="seccion-clickeable" style="fill:#0000ff" d="m 267.87495,302.96606 v 18.18824 l 44.92433,-0.0643 -0.12854,-18.7024 z" id="azul2" data-nombre="Tribuna Sur Central" data-precio="90" data-color="Azul" />
+                <path class="seccion-clickeable" style="fill:#0000ff" d="m 219.44794,140.87381 8.67637,18.35263 36.3765,0.0332 -0.16068,-19.24869 z" id="path10" data-nombre="Tribuna Norte-Oeste" data-precio="80" data-color="Azul" />
+                <path class="seccion-clickeable" style="fill:#0000ff" d="m 267.74641,140.78217 0.0643,18.54173 h 45.24568 l -0.44989,-18.67027 z" id="path11" data-nombre="Tribuna Norte Central" data-precio="90" data-color="Azul" />
+                
+                <path class="seccion-clickeable" style="fill:#ffff00" d="m 315.7997,302.5751 0.0229,18.65532 46.32934,0.13633 0.16039,-18.83709 z" id="amarillo1" data-nombre="Zona Especial Sur" data-precio="120" data-color="Amarillo" />
+                <path class="seccion-clickeable" style="fill:#ffff00" d="m 315.6914,140.6215 v 19.18442 c 0,0 45.88837,-0.41775 46.01691,-0.41775 0.12854,0 -0.12854,-19.28083 -0.12854,-19.28083 z" id="amarillo2" data-nombre="Zona Especial Norte" data-precio="120" data-color="Amarillo" />
+                
+                <path class="seccion-clickeable" style="fill:#ff0000" d="m 364.83522,302.77961 -0.15906,18.31447 44.65006,0.11361 -9.47536,-18.29175 z" id="rojo1" data-nombre="VIP Premium Sur" data-precio="250" data-color="Rojo" />
+                <path class="seccion-clickeable" style="fill:#ff0000" d="m 403.83869,301.59803 13.87219,13.89491 28.08522,-27.55124 -14.44025,-13.64496 z" id="rojo2.1" data-nombre="VIP Premium Lateral" data-precio="300" data-color="Rojo" />
+                <path class="seccion-clickeable" style="fill:#ff0000" d="m 437.85453,276.59173 6.80544,7.14628 3.9083,-5.32847 c 0,0 -6.12376,-2.29499 -7.85068,-2.68128" id="rojo2.1.1" data-nombre="VIP Premium Esquina" data-precio="300" data-color="Rojo" />
+                <path class="seccion-clickeable" style="fill:#ff0000" d="m 433.70764,228.59008 c 0.0909,0.0454 17.31468,0.47718 17.31468,0.47718 l 0.38628,-43.4912 -11.17955,3.95375 -2.27227,-2.40861 -4.70359,5.06716 z" id="rojo3" data-nombre="VIP Premium Central" data-precio="280" data-color="Rojo" />
+                <path class="seccion-clickeable" style="fill:#ff0000" d="m 437.82045,185.2125 7.49848,-7.68026 1.18158,2.9085 1.99959,2.61311 -8.83912,3.36295 z" id="path3.1" data-nombre="VIP Premium Superior" data-precio="320" data-color="Rojo" />
+                <path class="seccion-clickeable" style="fill:#ff0000" d="m 403.61197,159.64524 27.44304,27.73226 14.23568,-14.29995 -27.9572,-27.86079 z" id="rojo4" data-nombre="VIP Premium Norte" data-precio="320" data-color="Rojo" />
+                <path class="seccion-clickeable" style="fill:#ff0000" d="m 364.40349,140.72151 0.0682,17.86002 c 0,0 35.85638,0.45445 35.99271,0.59079 0.13634,0.13633 9.15724,-18.5417 9.15724,-18.5417 z" id="rojo5" data-nombre="VIP Premium Elite" data-precio="350" data-color="Rojo" />
+                <path class="seccion-clickeable" style="fill:#afe9c6" d="m 433.93487,269.42273 c 0,0.0909 4.83993,5.06715 4.83993,5.06715 l 1.77237,-2.99939 10.4297,4.09008 0.36356,-42.33234 -17.56462,-0.24995 z" id="menta1" data-nombre="Zona VIP Platino" data-precio="500" data-color="Verde Menta" />
+            </svg>
+
+                        <div id="seats-container" class="seats-container">
+                            <h3 style="color: #22b3c1; font-weight: 700;">Selecciona tus Asientos</h3>
+                            <div class="seats-legend">
+                                <div class="legend-item">
+                                    <div class="legend-seat" style="background: #28a745;"></div>
+                                    <span>Disponible</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-seat" style="background: #22b3c1;"></div>
+                                    <span>Seleccionado</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-seat" style="background: #dc3545;"></div>
+                                    <span>Ocupado</span>
+                                </div>
+                            </div>
+                            <div id="seats-grid" class="seats-grid"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="booking-panel">
+            <div class="panel-section">
+                <h3>Zona Seleccionada</h3>
+                <div id="zone-info" class="zone-info" style="display: none;">
+                    <div id="zone-name">Selecciona una zona</div>
+                    <div class="price">$<span id="zone-price">0</span> MXN</div>
+                </div>
+                <div id="no-selection" style="text-align: center; color: #666; padding: 20px;">
+                    Haz click en una zona del estadio
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3>Asientos Seleccionados</h3>
+                <div id="selected-seats" style="color: #333;">Ningún asiento seleccionado</div>
+            </div>
+
+            <div id="timer" class="timer">
+                Tiempo restante: <span id="countdown">10:00</span>
+            </div>
+
+            <div class="panel-section">
+                <button id="reserve-btn" class="btn btn-primary" disabled>
+                    Reservar Asientos
+                </button>
+                <button id="pay-btn" class="btn btn-success" style="display: none;">
+                    Pagar Ahora
+                </button>
+            </div>
+
+                        <div id="summary" class="summary">
+                            <h4>Resumen de Compra</h4>
+                            <div id="summary-content"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ***** Payment Modal Start ***** -->
+    <div id="payment-modal" class="payment-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Finalizar Compra</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+                <div class="step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Datos</div>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Pago</div>
+                </div>
+                <div class="step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Confirmación</div>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                <!-- Step 1: Personal Data -->
+                <div class="step-content active" id="step-1">
+                    <h3>Datos del Comprador</h3>
+                    <div class="form-group">
+                        <label>Nombre Completo *</label>
+                        <input type="text" id="fullName" placeholder="Juan Pérez González" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" id="email" placeholder="juan@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono *</label>
+                        <input type="tel" id="phone" placeholder="+52 1234567890" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Nacimiento *</label>
+                        <input type="date" id="birthDate" required>
+                    </div>
+                </div>
+
+                <!-- Step 2: Payment -->
+                <div class="step-content" id="step-2">
+                    <h3>Información de Pago</h3>
+                    <div class="payment-methods">
+                        <div class="payment-method active" data-method="card">
+                            <i class="fa fa-credit-card"></i>
+                            <span>Tarjeta de Crédito/Débito</span>
+                        </div>
+                    </div>
+                    
+                    <div id="card-form" class="payment-form active">
+                        <div class="form-group">
+                            <label>Número de Tarjeta *</label>
+                            <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Fecha de Expiración *</label>
+                                <input type="text" id="expiry" placeholder="MM/YY" maxlength="5">
+                            </div>
+                            <div class="form-group">
+                                <label>CVV *</label>
+                                <input type="text" id="cvv" placeholder="123" maxlength="3">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Nombre en la Tarjeta *</label>
+                            <input type="text" id="cardName" placeholder="Juan Pérez González">
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Step 3: Confirmation -->
+                <div class="step-content" id="step-3">
+                    <div class="success-animation">
+                        <div class="checkmark">
+                            <i class="fa fa-check"></i>
+                        </div>
+                        <h3>¡Pago Exitoso!</h3>
+                        <p>Tu compra ha sido procesada correctamente</p>
+                    </div>
+
+                    <div class="digital-ticket">
+                        <div class="ticket-header">
+                            <h4>BoletoNetwork</h4>
+                            <span class="ticket-number">#BN-2025-001234</span>
+                        </div>
+                        <div class="ticket-body">
+                            <div class="event-info">
+                                <h5 id="ticket-event">Concierto</h5>
+                                <p id="ticket-date">15 Dic 2025 - 20:00</p>
+                                <p id="ticket-venue">Estadio Monclova</p>
+                            </div>
+                            <div class="seat-info">
+                                <p><strong>Zona:</strong> <span id="ticket-zone">-</span></p>
+                                <p><strong>Asientos:</strong> <span id="ticket-seats">-</span></p>
+                                <p><strong>Total:</strong> <span id="ticket-total">$0 MXN</span></p>
+                            </div>
+                        </div>
+                        <div class="ticket-qr">
+                            <canvas id="qr-canvas" width="120" height="120"></canvas>
+                            <p style="font-size: 12px; margin-top: 8px;">Código QR</p>
+                        </div>
+                    </div>
+
+                    <div class="success-actions">
+                        <button class="btn btn-primary" onclick="downloadTicket()">
+                            <i class="fa fa-download"></i> Boleto Digital
+                        </button>
+                        <button class="btn btn-primary" onclick="downloadPrintableTicket()">
+                            <i class="fa fa-print"></i> Boleto Imprimible
+                        </button>
+                        <button class="btn btn-secondary" onclick="sendEmail()">
+                            <i class="fa fa-envelope"></i> Enviar por Email
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="back-btn" style="display: none;">Atrás</button>
+                <button class="btn btn-primary" id="next-btn">Continuar</button>
+            </div>
+        </div>
+    </div>
+    <!-- ***** Payment Modal End ***** -->
+
+    <script>
+        let selectedZone = null;
+        let selectedSeats = [];
+        let reservationTimer = null;
+        let timeLeft = 600; // 10 minutes in seconds
+
+        const secciones = document.querySelectorAll('.seccion-clickeable');
+        const seatsContainer = document.getElementById('seats-container');
+        const seatsGrid = document.getElementById('seats-grid');
+        const zoneInfo = document.getElementById('zone-info');
+        const noSelection = document.getElementById('no-selection');
+        const selectedSeatsDiv = document.getElementById('selected-seats');
+        const reserveBtn = document.getElementById('reserve-btn');
+        const payBtn = document.getElementById('pay-btn');
+        const timer = document.getElementById('timer');
+        const countdown = document.getElementById('countdown');
+        const summary = document.getElementById('summary');
+
+        // Zone prices and seat counts
+        const zoneData = {
+            'center': { seats: 24, price: 150 },
+            'path7': { seats: 32, price: 150 },
+            'azul1': { seats: 20, price: 80 },
+            'azul2': { seats: 28, price: 90 },
+            'path10': { seats: 18, price: 80 },
+            'path11': { seats: 25, price: 90 },
+            'amarillo1': { seats: 22, price: 120 },
+            'amarillo2': { seats: 24, price: 120 },
+            'rojo1': { seats: 16, price: 250 },
+            'rojo2.1': { seats: 12, price: 300 },
+            'rojo2.1.1': { seats: 8, price: 300 },
+            'rojo3': { seats: 14, price: 280 },
+            'path3.1': { seats: 10, price: 320 },
+            'rojo4': { seats: 15, price: 320 },
+            'rojo5': { seats: 18, price: 350 },
+            'menta1': { seats: 10, price: 500 }
+        };
+
+        // Handle zone selection
+        secciones.forEach(seccion => {
+            seccion.addEventListener('click', function() {
+                // Clear previous selection
+                document.querySelectorAll('.seccion-clickeable.selected').forEach(s => s.classList.remove('selected'));
+                selectedSeats = [];
+                updateSelectedSeats();
+                
+                const zoneId = this.getAttribute('id');
+                const zoneName = this.getAttribute('data-nombre');
+                const zonePrice = this.getAttribute('data-precio');
+                
+                selectedZone = { id: zoneId, name: zoneName, price: parseInt(zonePrice) };
+                
+                // Handle grouped zones
+                let relatedSections = [this];
+                if (zoneId === 'rojo2.1' || zoneId === 'rojo2.1.1') {
+                    relatedSections = document.querySelectorAll('#rojo2\\.1, #rojo2\\.1\\.1');
+                } else if (zoneId === 'path3.1' || zoneId === 'rojo4') {
+                    relatedSections = document.querySelectorAll('#path3\\.1, #rojo4');
+                }
+                
+                relatedSections.forEach(section => section.classList.add('selected'));
+                
+                // Update UI
+                noSelection.style.display = 'none';
+                zoneInfo.style.display = 'block';
+                document.getElementById('zone-name').textContent = zoneName;
+                document.getElementById('zone-price').textContent = zonePrice;
+                
+                generateSeats(zoneId);
+                seatsContainer.classList.add('active');
+                updateReserveButton();
+            });
+        });
+
+        function generateSeats(zoneId) {
+            seatsGrid.innerHTML = '';
+            const data = zoneData[zoneId] || zoneData[zoneId.split('.')[0]] || { seats: 20, price: 100 };
+            const totalSeats = data.seats;
+            
+            for (let i = 1; i <= totalSeats; i++) {
+                const seat = document.createElement('div');
+                seat.className = 'seat';
+                seat.textContent = i;
+                seat.dataset.seatNumber = i;
+                
+                // Randomly make some seats occupied (20% chance)
+                if (Math.random() < 0.2) {
+                    seat.classList.add('occupied');
+                } else {
+                    seat.addEventListener('click', function() {
+                        if (this.classList.contains('selected')) {
+                            this.classList.remove('selected');
+                            selectedSeats = selectedSeats.filter(s => s !== i);
+                        } else {
+                            this.classList.add('selected');
+                            selectedSeats.push(i);
+                        }
+                        updateSelectedSeats();
+                        updateReserveButton();
+                    });
+                }
+                
+                seatsGrid.appendChild(seat);
+            }
+        }
+
+        function updateSelectedSeats() {
+            if (selectedSeats.length === 0) {
+                selectedSeatsDiv.textContent = 'Ningún asiento seleccionado';
+            } else {
+                selectedSeatsDiv.innerHTML = `
+                    <strong>${selectedSeats.length} asiento(s):</strong><br>
+                    ${selectedSeats.sort((a, b) => a - b).join(', ')}
+                `;
+            }
+        }
+
+        function updateReserveButton() {
+            reserveBtn.disabled = !selectedZone || selectedSeats.length === 0;
+        }
+
+        function startTimer() {
+            timer.classList.add('active');
+            reservationTimer = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                countdown.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(reservationTimer);
+                    alert('Tiempo agotado. Su reservación ha expirado.');
+                    location.reload();
+                }
+            }, 1000);
+        }
+
+        function showSummary() {
+            const subtotal = selectedZone.price * selectedSeats.length;
+            const fees = Math.round(subtotal * 0.1); // 10% fees
+            const total = subtotal + fees;
+            
+            summary.innerHTML = `
+                <h4>Resumen de Compra</h4>
+                <div class="summary-item">
+                    <span>Zona:</span>
+                    <span>${selectedZone.name}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Asientos:</span>
+                    <span>${selectedSeats.join(', ')}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Cantidad:</span>
+                    <span>${selectedSeats.length} x $${selectedZone.price}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Subtotal:</span>
+                    <span>$${subtotal} MXN</span>
+                </div>
+                <div class="summary-item">
+                    <span>Cargos por servicio:</span>
+                    <span>$${fees} MXN</span>
+                </div>
+                <div class="summary-item">
+                    <span>Total:</span>
+                    <span>$${total} MXN</span>
+                </div>
+            `;
+            summary.classList.add('active');
+        }
+
+        reserveBtn.addEventListener('click', function() {
+            startTimer();
+            showSummary();
+            this.style.display = 'none';
+            payBtn.style.display = 'block';
+            
+            // Disable seat selection
+            document.querySelectorAll('.seat:not(.occupied):not(.selected)').forEach(seat => {
+                seat.style.pointerEvents = 'none';
+                seat.style.opacity = '0.5';
+            });
+        });
+
+        payBtn.addEventListener('click', function() {
+            clearInterval(reservationTimer);
+            showPaymentModal();
+        });
+
+        // Payment Modal Functions
+        let currentStep = 1;
+        let paymentMethod = 'card';
+
+        function showPaymentModal() {
+            const modal = document.getElementById('payment-modal');
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePaymentModal() {
+            const modal = document.getElementById('payment-modal');
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        function nextStep() {
+            if (currentStep < 3) {
+                // Validate current step
+                if (currentStep === 1 && !validatePersonalData()) {
+                    return;
+                }
+                if (currentStep === 2 && !validatePaymentData()) {
+                    return;
+                }
+
+                // Hide current step
+                document.querySelector(`.step-content:nth-child(${currentStep})`).classList.remove('active');
+                document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+                document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('completed');
+
+                currentStep++;
+
+                // Show next step
+                document.querySelector(`.step-content:nth-child(${currentStep})`).classList.add('active');
+                document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
+
+                // Update buttons
+                updateModalButtons();
+
+                // If it's the payment step, simulate processing
+                if (currentStep === 3) {
+                    simulatePayment();
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                // Hide current step
+                document.querySelector(`.step-content:nth-child(${currentStep})`).classList.remove('active');
+                document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+
+                currentStep--;
+
+                // Show previous step
+                document.querySelector(`.step-content:nth-child(${currentStep})`).classList.add('active');
+                document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('completed');
+                document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
+
+                updateModalButtons();
+            }
+        }
+
+        function updateModalButtons() {
+            const backBtn = document.getElementById('back-btn');
+            const nextBtn = document.getElementById('next-btn');
+
+            if (currentStep === 1) {
+                backBtn.style.display = 'none';
+                nextBtn.textContent = 'Continuar';
+            } else if (currentStep === 2) {
+                backBtn.style.display = 'block';
+                nextBtn.textContent = 'Procesar Pago';
+            } else {
+                backBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+            }
+        }
+
+        function validatePersonalData() {
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const birthDate = document.getElementById('birthDate').value;
+
+            if (!fullName || !email || !phone || !birthDate) {
+                alert('Por favor completa todos los campos obligatorios');
+                return false;
+            }
+
+            if (!email.includes('@')) {
+                alert('Por favor ingresa un email válido');
+                return false;
+            }
+
+            return true;
+        }
+
+        function validatePaymentData() {
+            if (paymentMethod === 'card') {
+                const cardNumber = document.getElementById('cardNumber').value;
+                const expiry = document.getElementById('expiry').value;
+                const cvv = document.getElementById('cvv').value;
+                const cardName = document.getElementById('cardName').value;
+
+                if (!cardNumber || !expiry || !cvv || !cardName) {
+                    alert('Por favor completa todos los datos de la tarjeta');
+                    return false;
+                }
+
+                if (cardNumber.replace(/\s/g, '').length < 16) {
+                    alert('El número de tarjeta debe tener 16 dígitos');
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function simulatePayment() {
+            // Update ticket info
+            const subtotal = selectedZone.price * selectedSeats.length;
+            const fees = Math.round(subtotal * 0.1);
+            const total = subtotal + fees;
+
+            document.getElementById('ticket-zone').textContent = selectedZone.name;
+            document.getElementById('ticket-seats').textContent = selectedSeats.join(', ');
+            document.getElementById('ticket-total').textContent = `$${total} MXN`;
+
+            // Generate QR Code with ticket data
+            generateQRCode();
+
+            // Simulate processing delay
+            setTimeout(() => {
+                playSuccessSound();
+            }, 1000);
+        }
+
+        function generateQRCode() {
+            const ticketNumber = generateTicketNumber();
+            const validationCode = generateValidationCode();
+            
+            // QR contains ticket data in readable format
+            const qrText = `BN-${ticketNumber}-${selectedZone.name}-${selectedSeats.join(',')}`;
+            
+            const canvas = document.getElementById('qr-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size to ensure quality
+            canvas.width = 160;
+            canvas.height = 160;
+            canvas.style.width = '120px';
+            canvas.style.height = '120px';
+            
+            try {
+                // Create QR code with higher error correction level
+                const qr = qrcode(0, 'H');
+                qr.addData(qrText);
+                qr.make();
+                
+                // Clear canvas with white background
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw QR code with better sizing
+                const modules = qr.getModuleCount();
+                const cellSize = Math.floor(canvas.width / modules);
+                const offset = Math.floor((canvas.width - (modules * cellSize)) / 2);
+                
+                ctx.fillStyle = '#000000';
+                for (let row = 0; row < modules; row++) {
+                    for (let col = 0; col < modules; col++) {
+                        if (qr.isDark(row, col)) {
+                            ctx.fillRect(
+                                offset + col * cellSize, 
+                                offset + row * cellSize, 
+                                cellSize, 
+                                cellSize
+                            );
+                        }
+                    }
+                }
+                
+                console.log('QR Code generated with data:', qrText);
+            } catch (error) {
+                console.error('Error generating QR code:', error);
+                // Fallback: draw a simple placeholder
+                ctx.fillStyle = '#333333';
+                ctx.fillRect(20, 20, canvas.width - 40, canvas.height - 40);
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('QR ERROR', canvas.width/2, canvas.height/2);
+            }
+
+            // Update ticket number in display
+            document.querySelector('.ticket-number').textContent = `#BN-${ticketNumber}`;
+            
+            // Store for PDF generation
+            window.currentTicketNumber = ticketNumber;
+            window.currentValidationCode = validationCode;
+            window.currentQRData = qrText;
+        }
+
+        function generateValidationCode() {
+            return Math.floor(1000000000 + Math.random() * 9000000000).toString();
+        }
+
+        function generateTicketNumber() {
+            return Math.floor(1000000000 + Math.random() * 9000000000).toString();
+        }
+
+        function playSuccessSound() {
+            // You can add actual sound here
+            console.log('Payment successful!');
+        }
+
+        function downloadTicket() {
+            // Ensure QR is generated first
+            if (!window.currentTicketNumber) {
+                generateQRCode();
+            }
+            
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            
+            // Get ticket data
+            const subtotal = selectedZone.price * selectedSeats.length;
+            const fees = Math.round(subtotal * 0.1);
+            const total = subtotal + fees;
+            const ticketNumber = window.currentTicketNumber;
+            const buyerName = document.getElementById('fullName').value;
+            const buyerEmail = document.getElementById('email').value;
+
+            // PDF Styling
+            pdf.setFillColor(34, 179, 193); // BoletoNetwork color
+            pdf.rect(0, 0, 210, 35, 'F'); // Header background
+
+            // Header
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(24);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('BOLETONETWORK', 20, 25);
+
+            pdf.setFontSize(12);
+            pdf.setFont(undefined, 'normal');
+            pdf.text('Boleto Digital de Concierto', 140, 25);
+
+            // Ticket Number
+            pdf.setTextColor(34, 179, 193);
+            pdf.setFontSize(14);
+            pdf.setFont(undefined, 'bold');
+            pdf.text(`#${ticketNumber}`, 20, 50);
+
+            // Event Information
+            pdf.setTextColor(0, 0, 0);
+            pdf.setFontSize(18);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('CONCIERTO EN ESTADIO MONCLOVA', 20, 70);
+
+            pdf.setFontSize(12);
+            pdf.setFont(undefined, 'normal');
+            
+            // Event Details with better spacing
+            pdf.text('Fecha y Hora:', 20, 88);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('15 Diciembre 2025 - 20:00', 70, 88);
+
+            pdf.setFont(undefined, 'normal');
+            pdf.text('Venue:', 20, 103);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Estadio Monclova', 70, 103);
+
+            pdf.setFont(undefined, 'normal');
+            pdf.text('Zona:', 20, 118);
+            pdf.setFont(undefined, 'bold');
+            pdf.text(selectedZone.name, 70, 118);
+
+            pdf.setFont(undefined, 'normal');
+            pdf.text('Asientos:', 20, 133);
+            pdf.setFont(undefined, 'bold');
+            pdf.text(selectedSeats.join(', '), 70, 133);
+
+            // Buyer Information
+            pdf.setTextColor(34, 179, 193);
+            pdf.setFontSize(14);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('INFORMACIÓN DEL COMPRADOR', 20, 155);
+
+            pdf.setTextColor(0, 0, 0);
+            pdf.setFontSize(12);
+            pdf.setFont(undefined, 'normal');
+            
+            pdf.text('Nombre:', 20, 173);
+            pdf.setFont(undefined, 'bold');
+            pdf.text(buyerName, 70, 173);
+
+            pdf.setFont(undefined, 'normal');
+            pdf.text('Email:', 20, 188);
+            pdf.setFont(undefined, 'bold');
+            pdf.text(buyerEmail, 70, 188);
+
+            // Payment Information
+            pdf.setTextColor(34, 179, 193);
+            pdf.setFontSize(14);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('INFORMACIÓN DE PAGO', 20, 210);
+
+            pdf.setTextColor(0, 0, 0);
+            pdf.setFontSize(12);
+            pdf.setFont(undefined, 'normal');
+
+            pdf.text('Subtotal:', 20, 228);
+            pdf.text(`$${subtotal} MXN`, 70, 228);
+
+            pdf.text('Cargos por servicio:', 20, 243);
+            pdf.text(`$${fees} MXN`, 70, 243);
+
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Total Pagado:', 20, 258);
+            pdf.text(`$${total} MXN`, 70, 258);
+
+            // QR Code - Create high quality QR for PDF
+            const canvas = document.getElementById('qr-canvas');
+            
+            // Wait a moment to ensure QR is rendered
+            setTimeout(() => {
+                // Get high quality QR data
+                const qrDataURL = canvas.toDataURL('image/png', 1.0);
+                
+                // Add QR code to PDF with better positioning and size
+                pdf.addImage(qrDataURL, 'PNG', 140, 80, 50, 50);
+                
+                pdf.setFontSize(10);
+                pdf.setFont(undefined, 'bold');
+                pdf.setTextColor(34, 179, 193);
+                pdf.text('CÓDIGO QR DE VALIDACIÓN', 140, 140);
+                
+                pdf.setFontSize(8);
+                pdf.setTextColor(0, 0, 0);
+                pdf.setFont(undefined, 'normal');
+                pdf.text('Escanee para validar entrada', 140, 150);
+                
+                // Add QR data as text for backup in smaller font
+                pdf.setFontSize(6);
+                pdf.setTextColor(100, 100, 100);
+                const qrData = window.currentQRData || ticketNumber;
+                const qrDataShort = qrData.length > 40 ? qrData.substring(0, 40) + '...' : qrData;
+                pdf.text(`Datos: ${qrDataShort}`, 140, 160);
+                
+                // Terms and conditions with better spacing
+                pdf.setFontSize(8);
+                pdf.setTextColor(100, 100, 100);
+                pdf.text('• Este boleto es personal e intransferible', 20, 275);
+                pdf.text('• Presentar documento de identidad en el evento', 20, 285);
+                
+                // Footer with validation info - moved down to avoid overlap
+                pdf.setFillColor(245, 245, 245);
+                pdf.rect(0, 290, 210, 7, 'F');
+                
+                pdf.setFontSize(6);
+                pdf.setTextColor(0, 0, 0);
+                pdf.text(`Generado: ${new Date().toLocaleDateString('es-MX')} | Validación: ${window.currentValidationCode}`, 20, 295);
+                
+                // Save PDF
+                pdf.save(`boleto_digital_${ticketNumber}.pdf`);
+                
+                setTimeout(() => {
+                    alert('¡Boleto PDF descargado exitosamente!');
+                }, 500);
+            }, 200);
+        }
+
+        function downloadPrintableTicket() {
+            // Ensure QR is generated first
+            if (!window.currentTicketNumber) {
+                generateQRCode();
+            }
+            
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            
+            // Get ticket data
+            const subtotal = selectedZone.price * selectedSeats.length;
+            const fees = Math.round(subtotal * 0.1);
+            const total = subtotal + fees;
+            const ticketNumber = window.currentTicketNumber;
+            const buyerName = document.getElementById('fullName').value;
+            const buyerEmail = document.getElementById('email').value;
+
+            // Set line properties for guides
+            pdf.setDrawColor(200, 200, 200);
+            pdf.setLineWidth(0.2);
+            
+            // Draw cut guides - outer border of ticket (ticket size: 180mm x 80mm)
+            const ticketX = 15;
+            const ticketY = 40;
+            const ticketWidth = 180;
+            const ticketHeight = 80;
+            
+            // Cut guides (dashed lines extending beyond ticket)
+            pdf.setLineDashPattern([2, 2], 0);
+            
+            // Top guide
+            pdf.line(5, ticketY, 205, ticketY);
+            // Bottom guide
+            pdf.line(5, ticketY + ticketHeight, 205, ticketY + ticketHeight);
+            // Left guide
+            pdf.line(ticketX, 20, ticketX, 140);
+            // Right guide
+            pdf.line(ticketX + ticketWidth, 20, ticketX + ticketWidth, 140);
+            
+            // Corner marks for precise cutting
+            pdf.setLineDashPattern([], 0);
+            pdf.setLineWidth(0.5);
+            pdf.setDrawColor(100, 100, 100);
+            
+            // Top-left corner
+            pdf.line(ticketX - 3, ticketY, ticketX + 3, ticketY);
+            pdf.line(ticketX, ticketY - 3, ticketX, ticketY + 3);
+            
+            // Top-right corner
+            pdf.line(ticketX + ticketWidth - 3, ticketY, ticketX + ticketWidth + 3, ticketY);
+            pdf.line(ticketX + ticketWidth, ticketY - 3, ticketX + ticketWidth, ticketY + 3);
+            
+            // Bottom-left corner
+            pdf.line(ticketX - 3, ticketY + ticketHeight, ticketX + 3, ticketY + ticketHeight);
+            pdf.line(ticketX, ticketY + ticketHeight - 3, ticketX, ticketY + ticketHeight + 3);
+            
+            // Bottom-right corner
+            pdf.line(ticketX + ticketWidth - 3, ticketY + ticketHeight, ticketX + ticketWidth + 3, ticketY + ticketHeight);
+            pdf.line(ticketX + ticketWidth, ticketY + ticketHeight - 3, ticketX + ticketWidth, ticketY + ticketHeight + 3);
+            
+            // Main ticket background with gradient effect
+            pdf.setFillColor(34, 179, 193);
+            pdf.roundedRect(ticketX, ticketY, ticketWidth, 25, 3, 3, 'F');
+            
+            // Ticket border
+            pdf.setDrawColor(34, 179, 193);
+            pdf.setLineWidth(1);
+            pdf.roundedRect(ticketX, ticketY, ticketWidth, ticketHeight, 3, 3, 'D');
+            
+            // Header section
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(20);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('BOLETONETWORK', ticketX + 10, ticketY + 15);
+            
+            pdf.setFontSize(10);
+            pdf.setFont(undefined, 'normal');
+            pdf.text('ENTRADA OFICIAL', ticketX + ticketWidth - 45, ticketY + 15);
+            
+            // Ticket number on header
+            pdf.setFontSize(8);
+            pdf.text(`#${ticketNumber}`, ticketX + ticketWidth - 45, ticketY + 22);
+            
+            // Event information section
+            pdf.setTextColor(0, 0, 0);
+            pdf.setFontSize(16);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('CONCIERTO EN ESTADIO MONCLOVA', ticketX + 10, ticketY + 35);
+            
+            pdf.setFontSize(11);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('15 DICIEMBRE 2025 - 20:00 HRS', ticketX + 10, ticketY + 45);
+            
+            // Venue and zone info
+            pdf.setFontSize(10);
+            pdf.setFont(undefined, 'normal');
+            pdf.text('ESTADIO MONCLOVA', ticketX + 10, ticketY + 55);
+            
+            pdf.setFont(undefined, 'bold');
+            pdf.text(`ZONA: ${selectedZone.name.toUpperCase()}`, ticketX + 10, ticketY + 65);
+            pdf.text(`ASIENTOS: ${selectedSeats.join(', ')}`, ticketX + 80, ticketY + 65);
+            
+            // Price information
+            pdf.setTextColor(34, 179, 193);
+            pdf.setFontSize(12);
+            pdf.setFont(undefined, 'bold');
+            pdf.text(`$${total} MXN`, ticketX + ticketWidth - 50, ticketY + 55);
+            
+            // QR Code section
+            const canvas = document.getElementById('qr-canvas');
+            
+            // Perforated line (separates stub from main ticket)
+            pdf.setDrawColor(150, 150, 150);
+            pdf.setLineDashPattern([1, 1], 0);
+            pdf.setLineWidth(0.3);
+            pdf.line(ticketX + ticketWidth - 60, ticketY + 5, ticketX + ticketWidth - 60, ticketY + ticketHeight - 5);
+            
+            setTimeout(() => {
+                const qrDataURL = canvas.toDataURL('image/png', 1.0);
+                
+                // Add QR code to stub section
+                pdf.addImage(qrDataURL, 'PNG', ticketX + ticketWidth - 50, ticketY + 25, 35, 35);
+                
+                // Stub information
+                pdf.setTextColor(0, 0, 0);
+                pdf.setFontSize(7);
+                pdf.setFont(undefined, 'normal');
+                pdf.text('CÓDIGO QR', ticketX + ticketWidth - 50, ticketY + 67);
+                pdf.text('DE VALIDACIÓN', ticketX + ticketWidth - 50, ticketY + 72);
+                
+                // Buyer name on ticket
+                pdf.setFontSize(8);
+                pdf.text(buyerName.toUpperCase(), ticketX + 10, ticketY + 75);
+                
+                // Instructions text
+                pdf.setFontSize(6);
+                pdf.setTextColor(100, 100, 100);
+                pdf.text('INSTRUCCIONES DE CORTE:', 15, 25);
+                pdf.text('1. Cortar por las líneas punteadas grises', 15, 28);
+                pdf.text('2. Usar las marcas de esquina como guía', 15, 31);
+                pdf.text('3. Conservar el código QR intacto para el acceso', 15, 34);
+                
+                // Footer info
+                pdf.text('• Boleto personal e intransferible • Presentar ID oficial • Conservar hasta el final del evento', 15, 135);
+                pdf.text(`Generado: ${new Date().toLocaleDateString('es-MX')} | Validación: ${window.currentValidationCode}`, 15, 140);
+                
+                // Save PDF
+                pdf.save(`boleto_imprimible_${ticketNumber}.pdf`);
+                
+                setTimeout(() => {
+                    alert('¡Boleto imprimible generado! Sigue las guías de corte para obtener tu boleto físico.');
+                }, 500);
+            }, 200);
+        }
+
+        function sendEmail() {
+            // Simulate email sending
+            alert('Boleto enviado por email exitosamente!');
+        }
+
+        // Event listeners
+        document.getElementById('next-btn').addEventListener('click', nextStep);
+        document.getElementById('back-btn').addEventListener('click', prevStep);
+        document.querySelector('.close-modal').addEventListener('click', closePaymentModal);
+
+        // Payment method selection
+        document.querySelectorAll('.payment-method').forEach(method => {
+            method.addEventListener('click', function() {
+                // Remove active from all methods
+                document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
+                document.querySelectorAll('.payment-form').forEach(f => f.classList.remove('active'));
+
+                // Add active to selected method
+                this.classList.add('active');
+                paymentMethod = this.getAttribute('data-method');
+
+                // Show corresponding form
+                document.getElementById(`${paymentMethod}-form`).classList.add('active');
+            });
+        });
+
+        // Card number formatting
+        document.getElementById('cardNumber').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let formattedValue = '';
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) {
+                    formattedValue += ' ';
+                }
+                formattedValue += value[i];
+            }
+            e.target.value = formattedValue;
+        });
+
+        // Expiry date formatting
+        document.getElementById('expiry').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('payment-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePaymentModal();
+            }
+        });
+    </script>
+
+    <!-- ***** Footer Start ***** -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <p>Copyright © 2025 <a href="#">BoletoNetwork</a> Company. All rights reserved. 
+                    <br>Sistema de Venta de Boletos para Conciertos</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- ***** Footer End ***** -->
+
+    <!-- Scripts -->
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+    
+    <!-- QR Code Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    
+    <!-- PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</body>
+</html>
